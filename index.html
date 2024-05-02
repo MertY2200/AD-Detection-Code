@@ -1,0 +1,104 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Prediction</title>
+    <style>
+        body {
+            background-color: #f0f0f0; /* Set background color */
+            font-family: Arial, sans-serif; /* Set font family */
+            text-align: center; /* Center align text */
+        }
+
+        .maindiv {
+            background-color: #fff; /* Set background color for main div */
+            border-radius: 10px; /* Add rounded corners to main div */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add shadow to main div */
+            padding: 20px; /* Add padding to main div */
+            margin: 50px auto; /* Center main div */
+            max-width: 600px; /* Limit main div width */
+        }
+
+        .inputl {
+            font-size: 18px; /* Set font size for input label */
+        }
+
+        .inputb {
+            width: calc(100% - 40px); /* Set width for input box */
+            padding: 10px; /* Add padding to input box */
+            margin: 10px 0; /* Add margin to input box */
+            font-size: 16px; /* Set font size for input box */
+            border: 1px solid #ccc; /* Add border to input box */
+            border-radius: 5px; /* Add rounded corners to input box */
+            box-sizing: border-box; /* Include padding and border in input box width */
+        }
+
+        .predictionbutton {
+            width: calc(100% - 40px); /* Set width for button */
+            padding: 10px; /* Add padding to button */
+            margin: 10px 0; /* Add margin to button */
+            font-size: 16px; /* Set font size for button */
+            background-color: #4CAF50; /* Set background color for button */
+            color: white; /* Set text color for button */
+            border: none; /* Remove border from button */
+            border-radius: 5px; /* Add rounded corners to button */
+            cursor: pointer; /* Change cursor to pointer on hover */
+        }
+
+        .predictionbutton:hover {
+            background-color: #45a049; /* Change background color on hover */
+        }
+
+        #prediction-result {
+            margin-top: 20px; /* Add margin to prediction result */
+            font-size: 18px; /* Set font size for prediction result */
+        }
+    </style>
+</head>
+<body>
+<div class="maindiv">
+    <h1>Model Prediction</h1>
+    <form id="prediction-form">
+        <label class="inputl" for="input-data">Enter Data:</label><br>
+        <input class="inputb" type="text" id="input-data" name="input_data" placeholder="e.g., 2,751,1,80,12,4.0,20.0,1.0,1494,0.661,1.175"><br><br>
+        <button class="predictionbutton" type="submit" id="predict-button">Predict</button>
+    </form>
+    <div id="prediction-result"></div>
+</div>
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            predict();
+        });
+
+        function predict() {
+            var inputData = document.getElementById('input-data').value;
+
+            // Validate input format
+            var inputValues = inputData.split(',');
+            if (inputValues.length !== 11 || inputValues.some(isNaN)) {
+                alert('Input format is not correct. Please enter 11 values separated by commas (integer or float).');
+                return;
+            }
+
+            fetch('/predict', {
+                method: 'POST',
+                body: new URLSearchParams({ input_data: inputData }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle prediction output
+                var predictionText = data.prediction === 0 ? 'Nondemented' : 'Demented';
+                document.getElementById('prediction-result').innerHTML = 'Prediction: ' + data.prediction + ': ' + predictionText;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
